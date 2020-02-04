@@ -4,7 +4,7 @@ Locales['en'] = {
 	['citizen_wear']			= 'Clock-Out',
 	['vehiclespawner']			= 'Select Truck Choice', 
 	['already_have_truck']		= 'we have allready provided a truck!', 
-	['collection']				= 'press ~INPUT_PICKUP~ to Pickup.',
+	['collection']				= '~INPUT_PICKUP~ to Pickup.',
 	['not_your_truck']			= 'it is not the truck that you have provided !',
 	['need_work_truck']			= 'you must be in the truck that you were provided with !',
 	['need_it']					= 'yeah, but we need it !',
@@ -26,5 +26,6 @@ Locales['en'] = {
 	['blip_delivery']			= 'biffa Logistics : Delivery', --'Garbage company : Delivery',
 	['blip_goal']				= 'biffa Logistics : Delivery point', --'Garbage company : Delivery point',
 	['blip_depot']				= 'biffa Logistics : depot', --'Garbage company : depot',
-	['cancel_mission']			= 'press ~INPUT_PICKUP~ to End/Cancel the mission',
+	['cancel_mission']			= '~INPUT_PICKUP~ to End/Cancel the mission',
+	['Collect_Bags']			 = '~INPUT_PICKUP~ to collect bag (%s left)',
 }

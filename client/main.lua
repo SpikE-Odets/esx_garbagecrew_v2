@@ -1,8 +1,9 @@
 ESX = nil
 local AreaType, AreaMarker, AreaInfo, currentZone = nil, nil, nil, nil
-local HasAlreadyEnteredArea, clockedin, vehiclespawned = false, false, false
-local work_truck, NewDrop, LastDrop = nil, nil, nil
-local Blips = {}
+local HasAlreadyEnteredArea, clockedin, vehiclespawned, albetogetbags = false, false, false, false
+local work_truck, NewDrop, LastDrop, JobBoss, binpos = nil, nil, nil, nil, nil
+local Blips, CollectionJobs = {}, {}
+
 
 
 Citizen.CreateThread(function()
@@ -36,6 +37,11 @@ AddEventHandler('esxgarbagejob:movetruckcount', function(count)
 	Config.TruckPlateNumb = count
 end)
 
+RegisterNetEvent('esx_garbagecrew:updatejobs')
+AddEventHandler('esx_garbagecrew:updatejobs', function(newjobtable)
+	CollectionJobs = newjobtable
+end)
+
 
 RegisterNetEvent('esx_garbagecrew:enteredarea')
 AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
@@ -56,7 +62,7 @@ AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 		CurrentActionMsg = _U('cancel_mission')
 	end
 
-	if CurrentAction == 'collection' then
+	if CurrentAction == 'collection' and not albetogetbags then
 		if IsPedInAnyVehicle(GetPlayerPed(-1)) and GetVehicleNumberPlateText(GetVehiclePedIsIn(GetPlayerPed(-1), false)) == worktruckplate then
 			CurrentActionMsg = _U('collection')
 		else
@@ -65,9 +71,8 @@ AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 
 	end
 
-	if CurrentAction == 'bags' then
-
-
+	if CurrentAction == 'bagcollection' then
+		CurrentActionMsg = _U('Collect_Bags', tostring(zone.totalbags))
 	end
 
 end)
@@ -98,8 +103,15 @@ Citizen.CreateThread( function()
 			end
 		end
 
+		for i, v in pairs(CollectionJobs) do
+			if GetDistanceBetweenCoords(plyloc, v.pos, true)  < 10.0 then
+				sleep = 0
+				DrawMarker(1, v.pos.x,  v.pos.y,  v.pos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0,  3.0,  3.0, 1.0, 255,0, 0, 100, false, true, 2, false, false, false, false)
+			end
+		end
+
 		if oncollection then
-			if GetDistanceBetweenCoords(plyloc, NewDrop.pos, true)  < 20.0 then
+			if GetDistanceBetweenCoords(plyloc, NewDrop.pos, true) < 20.0 and not albetogetbags then
 				sleep = 0
 				DrawMarker(1, NewDrop.pos.x,  NewDrop.pos.y,  NewDrop.pos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0,  NewDrop.size,  NewDrop.size, 1.0, 204,204, 0, 100, false, true, 2, false, false, false, false)
 			end
@@ -122,7 +134,14 @@ Citizen.CreateThread( function()
 			if IsControlJustReleased(0, 38) then
 
 				if CurrentAction == 'endmission' then
-					ESX.Game.DeleteVehicle(work_truck)
+					if IsPedInAnyVehicle(GetPlayerPed(-1)) then
+						local getvehicle = GetVehiclePedIsIn(GetPlayerPed(-1), false)
+						TaskLeaveVehicle(GetPlayerPed(-1), getvehicle, 0)
+					end
+					while IsPedInAnyVehicle(GetPlayerPed(-1)) do
+						Citizen.Wait(0)
+					end
+					Citizen.InvokeNative( 0xAE3CBE5BF394C9C9, Citizen.PointerValueIntInitialized( work_truck ) )
 					vehiclespawned = false
 					CurrentAction =nil
 					CurrentActionMsg = nil
@@ -130,12 +149,15 @@ Citizen.CreateThread( function()
 
 				if CurrentAction == 'collection' then
 					if CurrentActionMsg == _U('collection') then
-						SelectBinAndCrew()
+						SelectBinAndCrew(GetEntityCoords(GetPlayerPed(-1)))
+						CurrentAction = nil
+						CurrentActionMsg  = nil
+						IsInArea = false
 					end
 				end
 
-				if CurrentActionMsg == 'bags' then
-					CollectBagFromBin()
+				if CurrentAction == 'bagcollection' then
+					CollectBagFromBin(currentZone)
 				end
 
 			end
@@ -159,10 +181,17 @@ Citizen.CreateThread( function()
 			end
 		end
 
-		if oncollection then
+		if oncollection and not albetogetbags then
 			if GetDistanceBetweenCoords(plyloc, NewDrop.pos, true)  <  NewDrop.size then
 				IsInArea = true
 				currentZone = NewDrop
+			end
+		end
+
+		for i,v in pairs(CollectionJobs) do
+			if GetDistanceBetweenCoords(plyloc, v.pos, false)  <  2.0 then
+				IsInArea = true
+				currentZone = v
 			end
 		end
 
@@ -184,18 +213,26 @@ Citizen.CreateThread( function()
 	end
 end)
 
-function SelectBinAndCrew()
+
+function CollectBagFromBin()
+
+
+
+end
+
+function SelectBinAndCrew(location)
 	local bin = nil
 	for i, v in pairs(Config.DumpstersAvaialbe) do
-		bin = GetClosestObjectOfType(NewDrop.pos, 5.0, GetHashKey(v), false, false, false )
-		if bin ~= nil then
+		bin = GetClosestObjectOfType(location, 10.0, GetHashKey(v), false, false, false )
+		if bin ~= 0 then
 			break
 		end
 	end
-	
-	if bin ~= nil then
+	if bin ~= 0 then
 		truckplate = GetVehicleNumberPlateText(work_truck)
 		TriggerServerEvent('esx_garbagecrew:setworkers', GetEntityCoords(bin), truckplate )
+		JobBoss = true
+		albetogetbags = true
 	else
 		ESX.ShowNotification('No trash abailable for pickup at this location.')
 		FindDeliveryLoc(LastDrop)
@@ -262,48 +299,9 @@ function MenuCloakRoom()
 		function(data, menu)
 			if data.current.value == 'citizen_wear' then
 				clockedin = false
-				ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
-					  local model = nil
-
-					  if skin.sex == 0 then
-						model = GetHashKey("mp_m_freemode_01")
-					  else
-						model = GetHashKey("mp_f_freemode_01")
-					  end
-
-					  RequestModel(model)
-					  while not HasModelLoaded(model) do
-						RequestModel(model)
-						Citizen.Wait(1)
-					  end
-
-					  SetPlayerModel(PlayerId(), model)
-					  SetModelAsNoLongerNeeded(model)
-
-					  TriggerEvent('skinchanger:loadSkin', skin)
-					  TriggerEvent('esx:restoreLoadout')
-        end)
-      end
+      		end
 			if data.current.value == 'job_wear' then
 				clockedin = true
-				ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
-	    			if skin.sex == 0 then
-	    				TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_male)
-					else
-	    				TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_female)
-
-					RequestModel(model)
-					while not HasModelLoaded(model) do
-					RequestModel(model)
-					Citizen.Wait(0)
-					end
-
-				SetPlayerModel(PlayerId(), model)
-				SetModelAsNoLongerNeeded(model)
-					end
-					
-				end)
-
 			end	
 			menu.close()
 		end,

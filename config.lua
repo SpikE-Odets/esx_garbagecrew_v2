@@ -1,6 +1,7 @@
-Config              = {}
-Config.Locale       = 'en'
-Config.TruckPlateNumb = 0
+Config              		= {}
+Config.Locale       		= 'en'
+Config.TruckPlateNumb 		= 0
+Config.MaxBags				= 10
 
 Config.Trucks = {
 	"trash",
