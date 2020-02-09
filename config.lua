@@ -1,7 +1,11 @@
 Config              		= {}
 Config.Locale       		= 'en'
 Config.TruckPlateNumb 		= 0
-Config.MaxBags				= 10
+Config.MaxStops				= 10
+Config.MaxBags				= 5
+Config.MinBags				= 4
+Config.BagPay 				= 25
+Config.StopPay				= 200
 
 Config.Trucks = {
 	"trash",

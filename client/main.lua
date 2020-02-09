@@ -1,8 +1,8 @@
 ESX = nil
-local AreaType, AreaMarker, AreaInfo, currentZone = nil, nil, nil, nil
-local HasAlreadyEnteredArea, clockedin, vehiclespawned, albetogetbags = false, false, false, false
-local work_truck, NewDrop, LastDrop, JobBoss, binpos = nil, nil, nil, nil, nil
-local Blips, CollectionJobs = {}, {}
+local AreaType, AreaMarker, AreaInfo, currentZone, currentstop = nil, nil, nil, nil, 0
+local HasAlreadyEnteredArea, clockedin, vehiclespawned, albetogetbags, truckdeposit = false, false, false, false, false
+local work_truck, NewDrop, LastDrop, binpos, truckpos, garbagebag, truckplate = nil, nil, nil, nil, nil, nil, nil
+local Blips, CollectionJobs, depositlist = {}, {}, {}
 
 
 
@@ -43,9 +43,15 @@ AddEventHandler('esx_garbagecrew:updatejobs', function(newjobtable)
 end)
 
 
+RegisterNetEvent('esx_garbagecrew:selectnextjob')
+AddEventHandler('esx_garbagecrew:selectnextjob', function()
+	SetBlipRoute(Blips['delivery'], false)
+	FindDeliveryLoc(LastDrop)
+	albetogetbags = false
+end)
+
 RegisterNetEvent('esx_garbagecrew:enteredarea')
 AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
-	lastZone = zone  
 	CurrentAction = zone.name
 
 	if CurrentAction == 'timeclock' then
@@ -72,7 +78,15 @@ AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 	end
 
 	if CurrentAction == 'bagcollection' then
-		CurrentActionMsg = _U('Collect_Bags', tostring(zone.totalbags))
+		if zone.bagsremaining > 0 then
+			CurrentActionMsg = _U('collect_bags', tostring(zone.bagsremaining))
+		else
+			CurrentActionMsg = nil
+		end
+	end
+
+	if CurrentAction == 'deposit' then
+		CurrentActionMsg = _U('toss_bag')
 	end
 
 end)
@@ -103,10 +117,17 @@ Citizen.CreateThread( function()
 			end
 		end
 
-		for i, v in pairs(CollectionJobs) do
-			if GetDistanceBetweenCoords(plyloc, v.pos, true)  < 10.0 then
+		for i, v in pairs(CollectionJobs)  do
+			if GetDistanceBetweenCoords(plyloc, v.pos, true)  < 10.0 and truckpos == nil then
 				sleep = 0
 				DrawMarker(1, v.pos.x,  v.pos.y,  v.pos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0,  3.0,  3.0, 1.0, 255,0, 0, 100, false, true, 2, false, false, false, false)
+			end
+		end
+
+		if truckpos ~= nil then
+			if GetDistanceBetweenCoords(plyloc, truckpos, true) < 10.0  then
+				sleep = 0
+				DrawMarker(27, truckpos.x,  truckpos.y,  truckpos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0,  1.5, 1.5, 1.0, 0,100, 0, 100, false, true, 2, false, false, false, false)
 			end
 		end
 
@@ -142,6 +163,16 @@ Citizen.CreateThread( function()
 						Citizen.Wait(0)
 					end
 					Citizen.InvokeNative( 0xAE3CBE5BF394C9C9, Citizen.PointerValueIntInitialized( work_truck ) )
+					if Blips['delivery'] ~= nil then
+						RemoveBlip(Blips['delivery'])
+						Blips['delivery'] = nil
+					end
+					
+					if Blips['endmission'] ~= nil then
+						RemoveBlip(Blips['endmission'])
+						Blips['endmission'] = nil
+					end
+					SetBlipRoute(Blips['delivery'], false)
 					vehiclespawned = false
 					CurrentAction =nil
 					CurrentActionMsg = nil
@@ -157,7 +188,17 @@ Citizen.CreateThread( function()
 				end
 
 				if CurrentAction == 'bagcollection' then
+					CurrentAction = nil
+					CurrentActionMsg = nil
 					CollectBagFromBin(currentZone)
+					IsInArea = false
+				end
+
+				if CurrentAction == 'deposit' then
+					CurrentAction = nil
+					CurrentActionMsg = nil
+					PlaceBagInTruck(currentZone)
+					IsInArea = false
 				end
 
 			end
@@ -165,10 +206,12 @@ Citizen.CreateThread( function()
 
 	end
 end)
+
+
 -- thread so the script knows you have entered a markers area - 
 Citizen.CreateThread( function()
 	while true do 
-		sleep = 2500
+		sleep = 1000
 		ply = GetPlayerPed(-1)
 		plyloc = GetEntityCoords(ply)
 		IsInArea = false
@@ -188,10 +231,18 @@ Citizen.CreateThread( function()
 			end
 		end
 
+		if truckpos ~= nil then
+			if GetDistanceBetweenCoords(plyloc, truckpos, false)  <  2.0 then
+				IsInArea = true
+				currentZone = {type = 'Deposit', name = 'deposit', pos = truckpos,}
+			end
+		end
+
 		for i,v in pairs(CollectionJobs) do
-			if GetDistanceBetweenCoords(plyloc, v.pos, false)  <  2.0 then
+			if GetDistanceBetweenCoords(plyloc, v.pos, false)  <  2.0 and truckpos == nil then
 				IsInArea = true
 				currentZone = v
+
 			end
 		end
 
@@ -200,13 +251,11 @@ Citizen.CreateThread( function()
 			sleep = 0
 			TriggerEvent('esx_garbagecrew:enteredarea', currentZone)
 		end
-	
 
 		if not IsInArea and HasAlreadyEnteredArea then
 			HasAlreadyEnteredArea = false
-			sleep = 2500
+			sleep = 1000
 			TriggerEvent('esx_garbagecrew:leftarea', currentZone)
-
 		end
 
 		Citizen.Wait(sleep)
@@ -214,10 +263,63 @@ Citizen.CreateThread( function()
 end)
 
 
-function CollectBagFromBin()
+function CollectBagFromBin(currentZone)
+	binpos = currentZone.pos
+	truckplate = currentZone.trucknumber
+	if not HasAnimDictLoaded("anim@heists@narcotics@trash") then
+		RequestAnimDict("anim@heists@narcotics@trash") 
+		while not HasAnimDictLoaded("anim@heists@narcotics@trash") do 
+			Citizen.Wait(0)
+		end
+	end
+	local worktruck = NetworkGetEntityFromNetworkId(currentZone.truckid)
+	if DoesEntityExist(worktruck) then
+		truckpos =  GetWorldPositionOfEntityBone(worktruck, GetEntityBoneIndexByName(worktruck, "platelight"))  GetEntityCoords(worktruck)
+		TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_BUM_BIN", 0, true)
+		TriggerServerEvent('esx_garbagecrew:bagremoval', currentZone.pos, currentZone.trucknumber) 
+		trashcollection = false
+		Citizen.Wait(4000)
+		ClearPedTasks(PlayerPedId())
+		local randombag = math.random(0,2)
+		if randombag == 0 then
+			garbagebag = CreateObject(GetHashKey("prop_cs_street_binbag_01"), 0, 0, 0, true, true, true) -- creates object
+			AttachEntityToEntity(garbagebag, GetPlayerPed(-1), GetPedBoneIndex(GetPlayerPed(-1), 57005), 0.4, 0, 0, 0, 270.0, 60.0, true, true, false, true, 1, true) -- object is attached to right hand    
+		elseif randombag == 1 then
+			garbagebag = CreateObject(GetHashKey("bkr_prop_fakeid_binbag_01"), 0, 0, 0, true, true, true) -- creates object
+			AttachEntityToEntity(garbagebag, GetPlayerPed(-1), GetPedBoneIndex(GetPlayerPed(-1), 57005), .65, 0, -.1, 0, 270.0, 60.0, true, true, false, true, 1, true) -- object is attached to right hand    
+		elseif randombag == 2 then
+			garbagebag = CreateObject(GetHashKey("hei_prop_heist_binbag"), 0, 0, 0, true, true, true) -- creates object
+			AttachEntityToEntity(garbagebag, GetPlayerPed(-1), GetPedBoneIndex(GetPlayerPed(-1), 57005), 0.12, 0.0, 0.00, 25.0, 270.0, 180.0, true, true, false, true, 1, true) -- object is attached to right hand    
+		end   
+		TaskPlayAnim(PlayerPedId(), 'anim@heists@narcotics@trash', 'walk', 1.0, -1.0,-1,49,0,0, 0,0)
+		CurrentAction = nil
+		CurrentActionMsg = nil
+		HasAlreadyEnteredArea = false
 
+	else
+		ESX.ShowNotification(_U('not_near_truck'))
+	end
+end
 
-
+function PlaceBagInTruck(thiszone)
+	if not HasAnimDictLoaded("anim@heists@narcotics@trash") then
+		RequestAnimDict("anim@heists@narcotics@trash") 
+		while not HasAnimDictLoaded("anim@heists@narcotics@trash") do 
+			Citizen.Wait(0)
+		end
+	end
+	ClearPedTasksImmediately(GetPlayerPed(-1))
+	TaskPlayAnim(PlayerPedId(), 'anim@heists@narcotics@trash', 'throw_b', 1.0, -1.0,-1,2,0,0, 0,0)
+	Citizen.Wait(800)
+	local garbagebagdelete = DeleteEntity(garbagebag)
+	Citizen.Wait(100)
+	ClearPedTasksImmediately(GetPlayerPed(-1))
+	CurrentAction = nil
+	CurrentActionMsg = nil
+	depositlist = nil
+	truckpos = nil
+	TriggerServerEvent('esx_garbagecrew:bagdumped', binpos, truckplate)
+	HasAlreadyEnteredArea = false
 end
 
 function SelectBinAndCrew(location)
@@ -230,48 +332,58 @@ function SelectBinAndCrew(location)
 	end
 	if bin ~= 0 then
 		truckplate = GetVehicleNumberPlateText(work_truck)
-		TriggerServerEvent('esx_garbagecrew:setworkers', GetEntityCoords(bin), truckplate )
-		JobBoss = true
+		truckid = NetworkGetNetworkIdFromEntity(work_truck)
+		TriggerServerEvent('esx_garbagecrew:setworkers', GetEntityCoords(bin), truckplate, truckid )
+		truckpos = nil
 		albetogetbags = true
+		SetBlipRoute(Blips['delivery'], false)
 	else
-		ESX.ShowNotification('No trash abailable for pickup at this location.')
+		ESX.ShowNotification('No trash available for pickup at this location.')
+		SetBlipRoute(Blips['delivery'], false)
 		FindDeliveryLoc(LastDrop)
 	end
 end
 
 function FindDeliveryLoc(LastDrop)
-	if LastDrop ~= nil then
-		lastregion = GetNameOfZone(LastDrop.pos)
-	end
-	local newdropregion = nil
-	while newdropregion == nil or newdropregion == lastregion do
-		randomloc = math.random(1, #Config.Collections)
-		newdropregion = GetNameOfZone(Config.Collections[randomloc].pos)
-	end
-	NewDrop = Config.Collections[randomloc]
-	LastDrop = NewDrop
-	if Blips['delivery'] ~= nil then
-		RemoveBlip(Blips['delivery'])
-		Blips['delivery'] = nil
-	end
-	
-	if Blips['endmission'] ~= nil then
-		RemoveBlip(Blips['endmission'])
-		Blips['endmission'] = nil
-	end
-	
-	Blips['delivery'] = AddBlipForCoord(NewDrop.pos)
-	SetBlipRoute(Blips['delivery'], true)
-	BeginTextCommandSetBlipName("STRING")
-	AddTextComponentString(_U('blip_delivery'))
-	EndTextCommandSetBlipName(Blips['delivery'])
-	
-	Blips['endmission'] = AddBlipForCoord(Config.Zones[1].pos)
-	BeginTextCommandSetBlipName("STRING")
-	AddTextComponentString(_U('blip_goal'))
-	EndTextCommandSetBlipName(Blips['endmission'])
+	if currentstop < Config.MaxStops then
+		if LastDrop ~= nil then
+			lastregion = GetNameOfZone(LastDrop.pos)
+		end
+		local newdropregion = nil
+		while newdropregion == nil or newdropregion == lastregion do
+			randomloc = math.random(1, #Config.Collections)
+			newdropregion = GetNameOfZone(Config.Collections[randomloc].pos)
+		end
+		NewDrop = Config.Collections[randomloc]
+		LastDrop = NewDrop
+		if Blips['delivery'] ~= nil then
+			RemoveBlip(Blips['delivery'])
+			Blips['delivery'] = nil
+		end
+		
+		if Blips['endmission'] ~= nil then
+			RemoveBlip(Blips['endmission'])
+			Blips['endmission'] = nil
+		end
+		
+		Blips['delivery'] = AddBlipForCoord(NewDrop.pos)
+		SetBlipSprite (Blips['delivery'], 318)
+		SetBlipAsShortRange(Blips['delivery'], true)
+		SetBlipRoute(Blips['delivery'], true)
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString(_U('blip_delivery'))
+		EndTextCommandSetBlipName(Blips['delivery'])
+		
+		Blips['endmission'] = AddBlipForCoord(Config.Zones[1].pos)
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString(_U('blip_goal'))
+		EndTextCommandSetBlipName(Blips['endmission'])
 
-	oncollection = true
+		oncollection = true
+		ESX.ShowNotification(_U('drive_to_collection'))
+	else
+		ESX.ShowNotification(_U('return_depot'))
+	end
 end
 
 function IsGarbageJob()
