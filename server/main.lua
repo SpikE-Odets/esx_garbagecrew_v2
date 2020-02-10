@@ -17,7 +17,8 @@ AddEventHandler('esx_garbagecrew:bagdumped', function(location, truckplate)
             for workers, ids in pairs(v.workers) do
                 if ids.id == _source then
                     ids.bags = ids.bags + 1
-                    if v.bagsremaining <= 0 then
+                    v.bagsdropped = v.bagsdropped + 1
+                    if v.bagsremaining <= 0  and v.bagsdropped == v.totalbags then
                         TriggerEvent('esx_garbagecrew:paycrew', i)
                     end
                     updated = true
@@ -28,7 +29,8 @@ AddEventHandler('esx_garbagecrew:bagdumped', function(location, truckplate)
             if not updated then
                 local buildlist = { id = _source, bags = 1,}
                 table.insert(v.workers, buildlist)
-                if v.bagsremaining <= 0 then
+                v.bagsdropped = v.bagsdropped + 1
+                if v.bagsremaining <= 0  and v.bagsdropped == v.totalbags then
                   TriggerEvent('esx_garbagecrew:paycrew', i)
                 end
             end
@@ -82,7 +84,7 @@ AddEventHandler('esx_garbagecrew:setworkers', function(location, trucknumber, tr
     if currentjobs[trucknumber] ~= nil then
         currentjobs[trucknumber] = nil
     end
-    local buildlist = {type = 'bags', name = 'bagcollection', jobboss = _source, pos = location, totalbags = bagtotal, bagsremaining = bagtotal, trucknumber = trucknumber, truckid = truckid, workers = {}, }
+    local buildlist = {type = 'bags', name = 'bagcollection', jobboss = _source, pos = location, totalbags = bagtotal, bagsdropped = 0, bagsremaining = bagtotal, trucknumber = trucknumber, truckid = truckid, workers = {}, }
     table.insert(currentjobs, buildlist)
     TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
 end)

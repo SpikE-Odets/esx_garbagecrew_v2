@@ -273,7 +273,7 @@ function CollectBagFromBin(currentZone)
 		end
 	end
 	local worktruck = NetworkGetEntityFromNetworkId(currentZone.truckid)
-	if DoesEntityExist(worktruck) then
+	if DoesEntityExist(worktruck) and GetDistanceBetweenCoords(GetEntityCoords(worktruck), GetEntityCoords(GetPlayerPed(-1)), true) < 10.0 then
 		truckpos =  GetWorldPositionOfEntityBone(worktruck, GetEntityBoneIndexByName(worktruck, "platelight"))  GetEntityCoords(worktruck)
 		TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_BUM_BIN", 0, true)
 		TriggerServerEvent('esx_garbagecrew:bagremoval', currentZone.pos, currentZone.trucknumber) 
