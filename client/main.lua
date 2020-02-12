@@ -19,16 +19,6 @@ Citizen.CreateThread(function()
 	PlayerData = ESX.GetPlayerData()
 end)
 
-RegisterCommand('checktruck', function(source, args, rawCommand)
-	worktruck = GetVehiclePedIsIn(GetPlayerPed(-1))
-	truckoffset = GetOffsetFromEntityInWorldCoords(worktruck, 0.0, -5.0, 0.0)
-	print(tostring(truckoffset))
-	SetEntityCoords(GetPlayerPed(-1), truckoffset.x, truckoffset.y, truckoffset.z, 0.0, 0.0, 0.0, false)
-end)
-
-
-GetOffsetFromEntityInWorldCoords(worktruck, 0.0, 100.0, 0.0)
-
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer)
 	PlayerData = xPlayer
