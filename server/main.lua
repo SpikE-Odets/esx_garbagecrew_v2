@@ -112,24 +112,3 @@ AddEventHandler('esx_garbagecrew:paycrew', function(number)
     table.remove(currentjobs, number)
     TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
 end)
-
---[[
-Citizen.CreateThread(function()
-    loopit = 0
-    while loopit < 3 do
-        for i, v in pairs(Config.Collections) do
-            trucknumber = 1234
-            truckid     = 4321
-            location = v.pos
-            bagtotal = math.random(4,10)
-            local buildlist = {type = 'bags', name = 'bagcollection', jobboss = _source, pos = location, totalbags = bagtotal, bagsdropped = 0, bagsremaining = bagtotal, trucknumber = trucknumber, truckid = truckid, workers = {}, }
-            table.insert(currentjobs, buildlist)
-        end
-        loopit = loopit + 1
-        Citizen.Wait(0)
-    end
-    print(#currentjobs)
-    Citizen.Wait(1000)
-    TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
-end)
-]]
