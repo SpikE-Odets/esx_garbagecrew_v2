@@ -103,12 +103,12 @@ AddEventHandler('esx_garbagecrew:paycrew', function(number)
     currentcrew = currentjobs[number].workers
     payamount = (Config.StopPay / currentjobs[number].totalbags) + Config.BagPay
     for i, v in pairs(currentcrew) do
-        if NetworkIsPlayerActive(v.id) then
+        
             local xPlayer = ESX.GetPlayerFromId(v.id)
             local amount = math.ceil(payamount * v.bags)
             xPlayer.addMoney(tonumber(amount))
             TriggerClientEvent('esx:showNotification', v.id, 'Received '..tostring(amount)..' from this stop!')
-        end
+
     end
     TriggerClientEvent('esx_garbagecrew:selectnextjob', currentjobs[number].jobboss )
     table.remove(currentjobs, number)
