@@ -1,5 +1,5 @@
 ***Download***
-[GitHub - GarbageCrew](https://github.com/SpikE-Odets/esx_garbagecrew)
+[GitHub - GarbageCrew v2](https://github.com/SpikE-Odets/esx_garbagecrew_v2)
 
 ------------------------------------------------------------------------------------
 This is a the next step in my GarbageCrew job. Most servers you can rob a bank with 1 - 4 people, rob a store with 1-4 people, but any legal work must be done solo. This shows it can be done - with the pay split between everyone that is doing the job. I have spent a fair bit of time testing the networking on my personal test server, on a live dev server with 2-3 people helping me, and as of the last 12hrs live on 2 seperate servers.
@@ -13,7 +13,7 @@ The original creator is listed on the copy that I received are:
 
 -- ORIGINAL SCRIPT BY Marcio FOR CFX-ESX
 
-Changes to my version of script:
+Changes to my this version:
 
 * Security Fix:  I have completly rewritten how the script handles pay.  No more clientside being able to send request for amount of money.  When last bag is done the sever looks
   in the list of jobs for who has put bags in the truck and pays them the correct amount.
