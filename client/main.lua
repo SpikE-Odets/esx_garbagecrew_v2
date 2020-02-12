@@ -348,7 +348,6 @@ function SelectBinAndCrew(location)
 end
 
 function FindDeliveryLoc()
-	print(tostring(LastDrop))
 	if currentstop < Config.MaxStops then
 		if LastDrop ~= nil then
 			lastregion = GetNameOfZone(LastDrop.pos)
