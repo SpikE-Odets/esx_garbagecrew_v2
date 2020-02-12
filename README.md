@@ -85,5 +85,7 @@ ESX_Jobs
 -- Install --
 
 Import garbagejob_v2.sql if you do not already have the garbagejob on your server for work clothes settings.
+
 add esx_garbagecrew to your resource folder.
+
 start esx_garbagecrew in your server.fg
