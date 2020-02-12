@@ -39,10 +39,23 @@ AddEventHandler('esx_garbagecrew:bagdumped', function(location, truckplate)
 end)
 
 
+RegisterServerEvent('esx_garbagecrew:unknownlocation')
+AddEventHandler('esx_garbagecrew:unknownlocation', function(location, truckplate)
+    for i,v in pairs(currentjobs) do
+        if v.pos == location and v.trucknumber == truckplate  then
+            if #v.workers > 0 then
+                TriggerEvent('esx_garbagecrew:paycrew', i)
+            else
+                table.remove(currentjobs, number)
+                TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
+            end
+            break
+       end
+   end
+end)
 
 RegisterServerEvent('esx_garbagecrew:bagremoval')
 AddEventHandler('esx_garbagecrew:bagremoval', function(location, trucknumber)
-    print('checking for bag removal in '.. tostring(#currentjobs) .. ' jobs!')
     for i,v in pairs(currentjobs) do
         if v.pos == location and v.trucknumber == trucknumber and v.bagsremaining > 0 then
             v.bagsremaining = v.bagsremaining - 1
@@ -54,27 +67,23 @@ AddEventHandler('esx_garbagecrew:bagremoval', function(location, trucknumber)
 end)
 
 
-RegisterServerEvent('esxgarbagejob:movetruckcount')
-AddEventHandler('esxgarbagejob:movetruckcount', function()
+RegisterServerEvent('esx_garbagecrew:movetruckcount')
+AddEventHandler('esx_garbagecrew:movetruckcount', function()
     Config.TruckPlateNumb = Config.TruckPlateNumb + 1
     if Config.TruckPlateNumb == 1000 then
         Config.TruckPlateNumb = 1
     end
-    TriggerClientEvent('esxgarbagejob:movetruckcount', -1, Config.TruckPlateNumb)
+    TriggerClientEvent('esx_garbagecrew:movetruckcount', -1, Config.TruckPlateNumb)
 end)
 
 RegisterServerEvent('esx_garbagejob:setconfig')
 AddEventHandler('esx_garbagejob:setconfig', function()
-    TriggerClientEvent('esxgarbagejob:movetruckcount', -1, Config.TruckPlateNumb)
+    TriggerClientEvent('esx_garbagecrew:movetruckcount', -1, Config.TruckPlateNumb)
     if #currentjobs >  0 then
         TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
     end
 end)
 
-RegisterServerEvent('esx_garbagecrew:setworkers')
-AddEventHandler('esx_garbagecrew:setworkers', function(location, trucknumber)
-
-end)
 
 
 RegisterServerEvent('esx_garbagecrew:setworkers')
@@ -97,9 +106,30 @@ AddEventHandler('esx_garbagecrew:paycrew', function(number)
         local xPlayer = ESX.GetPlayerFromId(v.id)
         local amount = math.ceil(payamount * v.bags)
         xPlayer.addMoney(tonumber(amount))
-        TriggerClientEvent('esx:showNotification', v.id, '~s~Received~g~ '..tostring(amount)..' ~s~from this stop~s~!')
+        TriggerClientEvent('esx:showNotification', v.id, 'Received '..tostring(amount)..' from this stop!')
     end
     TriggerClientEvent('esx_garbagecrew:selectnextjob', currentjobs[number].jobboss )
     table.remove(currentjobs, number)
     TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
 end)
+
+--[[
+Citizen.CreateThread(function()
+    loopit = 0
+    while loopit < 3 do
+        for i, v in pairs(Config.Collections) do
+            trucknumber = 1234
+            truckid     = 4321
+            location = v.pos
+            bagtotal = math.random(4,10)
+            local buildlist = {type = 'bags', name = 'bagcollection', jobboss = _source, pos = location, totalbags = bagtotal, bagsdropped = 0, bagsremaining = bagtotal, trucknumber = trucknumber, truckid = truckid, workers = {}, }
+            table.insert(currentjobs, buildlist)
+        end
+        loopit = loopit + 1
+        Citizen.Wait(0)
+    end
+    print(#currentjobs)
+    Citizen.Wait(1000)
+    TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
+end)
+]]

@@ -19,12 +19,20 @@ Citizen.CreateThread(function()
 	PlayerData = ESX.GetPlayerData()
 end)
 
+RegisterCommand('checktruck', function(source, args, rawCommand)
+	worktruck = GetVehiclePedIsIn(GetPlayerPed(-1))
+	truckoffset = GetOffsetFromEntityInWorldCoords(worktruck, 0.0, -5.0, 0.0)
+	print(tostring(truckoffset))
+	SetEntityCoords(GetPlayerPed(-1), truckoffset.x, truckoffset.y, truckoffset.z, 0.0, 0.0, 0.0, false)
+end)
 
+
+GetOffsetFromEntityInWorldCoords(worktruck, 0.0, 100.0, 0.0)
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer)
 	PlayerData = xPlayer
-	TriggerServerEvent('esx_garbagejob:setconfig')
+	TriggerServerEvent('esx_garbagecrew:setconfig')
 end)
 
 RegisterNetEvent('esx:setJob')
@@ -32,8 +40,8 @@ AddEventHandler('esx:setJob', function(job)
 	PlayerData.job = job
 end)
 
-RegisterNetEvent('esxgarbagejob:movetruckcount')
-AddEventHandler('esxgarbagejob:movetruckcount', function(count)
+RegisterNetEvent('esx_garbagecrew:movetruckcount')
+AddEventHandler('esx_garbagecrew:movetruckcount', function(count)
 	Config.TruckPlateNumb = count
 end)
 
@@ -45,8 +53,9 @@ end)
 
 RegisterNetEvent('esx_garbagecrew:selectnextjob')
 AddEventHandler('esx_garbagecrew:selectnextjob', function()
+	SetVehicleDoorShut(work_truck, 5, false)
 	SetBlipRoute(Blips['delivery'], false)
-	FindDeliveryLoc(LastDrop)
+	FindDeliveryLoc()
 	albetogetbags = false
 end)
 
@@ -54,7 +63,7 @@ RegisterNetEvent('esx_garbagecrew:enteredarea')
 AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 	CurrentAction = zone.name
 
-	if CurrentAction == 'timeclock' then
+	if CurrentAction == 'timeclock'  and IsGarbageJob() then
 		MenuCloakRoom()
 	end
 
@@ -64,7 +73,7 @@ AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 		end
 	end
 
-	if CurrentAction == 'endmission' then
+	if CurrentAction == 'endmission' and vehiclespawned then
 		CurrentActionMsg = _U('cancel_mission')
 	end
 
@@ -100,7 +109,7 @@ end)
 
 Citizen.CreateThread( function()
 	while true do 
-		sleep = 1000
+		sleep = 1500
 		ply = GetPlayerPed(-1)
 		plyloc = GetEntityCoords(ply)
 
@@ -121,13 +130,14 @@ Citizen.CreateThread( function()
 			if GetDistanceBetweenCoords(plyloc, v.pos, true)  < 10.0 and truckpos == nil then
 				sleep = 0
 				DrawMarker(1, v.pos.x,  v.pos.y,  v.pos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0,  3.0,  3.0, 1.0, 255,0, 0, 100, false, true, 2, false, false, false, false)
+				break
 			end
 		end
 
 		if truckpos ~= nil then
 			if GetDistanceBetweenCoords(plyloc, truckpos, true) < 10.0  then
 				sleep = 0
-				DrawMarker(27, truckpos.x,  truckpos.y,  truckpos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0,  1.5, 1.5, 1.0, 0,100, 0, 100, false, true, 2, false, false, false, false)
+				DrawMarker(20, truckpos.x,  truckpos.y,  truckpos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0,  1.0, 1.0, 1.0, 0,100, 0, 100, false, true, 2, false, false, false, false)
 			end
 		end
 
@@ -273,8 +283,8 @@ function CollectBagFromBin(currentZone)
 		end
 	end
 	local worktruck = NetworkGetEntityFromNetworkId(currentZone.truckid)
-	if DoesEntityExist(worktruck) and GetDistanceBetweenCoords(GetEntityCoords(worktruck), GetEntityCoords(GetPlayerPed(-1)), true) < 10.0 then
-		truckpos =  GetWorldPositionOfEntityBone(worktruck, GetEntityBoneIndexByName(worktruck, "platelight"))  GetEntityCoords(worktruck)
+	if DoesEntityExist(worktruck) and GetDistanceBetweenCoords(GetEntityCoords(worktruck), GetEntityCoords(GetPlayerPed(-1)), true) < 25.0 then
+		truckpos = GetOffsetFromEntityInWorldCoords(worktruck, 0.0, -5.25, 0.0)
 		TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_BUM_BIN", 0, true)
 		TriggerServerEvent('esx_garbagecrew:bagremoval', currentZone.pos, currentZone.trucknumber) 
 		trashcollection = false
@@ -298,6 +308,7 @@ function CollectBagFromBin(currentZone)
 
 	else
 		ESX.ShowNotification(_U('not_near_truck'))
+		TriggerServerEvent('esx_garbagecrew:unknownlocation', currentZone.pos, currentZone.trucknumber)
 	end
 end
 
@@ -337,14 +348,17 @@ function SelectBinAndCrew(location)
 		truckpos = nil
 		albetogetbags = true
 		SetBlipRoute(Blips['delivery'], false)
+		currentstop = currentstop + 1
+		SetVehicleDoorOpen(work_truck, 5, false, false)
 	else
 		ESX.ShowNotification('No trash available for pickup at this location.')
 		SetBlipRoute(Blips['delivery'], false)
-		FindDeliveryLoc(LastDrop)
+		FindDeliveryLoc()
 	end
 end
 
-function FindDeliveryLoc(LastDrop)
+function FindDeliveryLoc()
+	print(tostring(LastDrop))
 	if currentstop < Config.MaxStops then
 		if LastDrop ~= nil then
 			lastregion = GetNameOfZone(LastDrop.pos)
@@ -411,9 +425,51 @@ function MenuCloakRoom()
 		function(data, menu)
 			if data.current.value == 'citizen_wear' then
 				clockedin = false
+				if Config.UseWorkClothing then
+					ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
+						local model = nil
+  
+						if skin.sex == 0 then
+						  model = GetHashKey("mp_m_freemode_01")
+						else
+						  model = GetHashKey("mp_f_freemode_01")
+						end
+  
+						RequestModel(model)
+						while not HasModelLoaded(model) do
+						  RequestModel(model)
+						  Citizen.Wait(1)
+						end
+  
+						SetPlayerModel(PlayerId(), model)
+						SetModelAsNoLongerNeeded(model)
+  
+						TriggerEvent('skinchanger:loadSkin', skin)
+				  	end)
+				end
       		end
 			if data.current.value == 'job_wear' then
 				clockedin = true
+				if Config.UseWorkClothing then
+					ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
+						if skin.sex == 0 then
+							TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_male)
+						else
+							TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_female)
+	
+						RequestModel(model)
+						while not HasModelLoaded(model) do
+						RequestModel(model)
+						Citizen.Wait(0)
+						end
+	
+						SetPlayerModel(PlayerId(), model)
+						SetModelAsNoLongerNeeded(model)
+						end
+						
+					end)
+				end
+	
 			end	
 			menu.close()
 		end,
@@ -454,12 +510,12 @@ function MenuVehicleSpawner()
 				end
 
 
-				TriggerServerEvent('esxgarbagejob:movetruckcount')   
+				TriggerServerEvent('esx_garbagecrew:movetruckcount')   
 				SetEntityAsMissionEntity(vehicle,true, true)
 				TaskWarpPedIntoVehicle(GetPlayerPed(-1), vehicle, -1)  
 				vehiclespawned = true 
 				work_truck = vehicle
-				FindDeliveryLoc(LastDrop)
+				FindDeliveryLoc()
 
 			end)
 
