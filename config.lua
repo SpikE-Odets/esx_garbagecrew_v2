@@ -1,33 +1,32 @@
-Config              		= {}
-Config.Locale       		= 'en'			--  The local you want to use for your server
-Config.TruckPlateNumb 		= 0  			--  This starts the custom plate for trucks at 0
-Config.MaxStops				= 10			--  Total number of stops a person is allowed to do before having to return to depot.
-Config.MaxBags				= 10			--  Total number of bags a person can get out of a bin
-Config.MinBags				= 4				--  Min number of bags that a bin can contain.
-Config.BagPay 				= 25			--  The amount paid to each person per bag
-Config.StopPay				= 200			--  Total pay for the stop before bagpay.
+Config = {}
+Config.Locale = 'en' -- The local you want to use for your server
+Config.TruckPlateNumb = 0  -- This starts the custom plate for trucks at 0
+Config.MaxStops	= 10 -- Total number of stops a person is allowed to do before having to return to depot.
+Config.MaxBags = 10 -- Total number of bags a person can get out of a bin
+Config.MinBags = 4 -- Min number of bags that a bin can contain.
+Config.BagPay = 25 -- The amount paid to each person per bag
+Config.StopPay = 200 -- Total pay for the stop before bagpay.
 
-
-Config.UseWorkClothing		= false			--  Will change the player into garbage outfit  at clock-in   and back to street close at clock-out
+Config.UseWorkClothing = false	-- Will change the player into garbage outfit  at clock-in   and back to street close at clock-out
 
 Config.Trucks = {
-	"trash",
-	"trash2",
+	'trash',
+	'trash2',
 }
 
 Config.DumpstersAvaialbe = {
-    "prop_dumpster_01a",
-    "prop_dumpster_02a",
-	"prop_dumpster_02b",
-	"prop_dumpster_3a",
-	"prop_dumpster_4a",
-	"prop_dumpster_4b",
-	"prop_skip_01a",
-	"prop_skip_02a",
-	"prop_skip_06a",
-	"prop_skip_05a",
-	"prop_skip_03",
-	"prop_skip_10a"
+	'prop_dumpster_01a',
+	'prop_dumpster_02a',
+	'prop_dumpster_02b',
+	'prop_dumpster_3a',
+	'prop_dumpster_4a',
+	'prop_dumpster_4b',
+	'prop_skip_01a',
+	'prop_skip_02a',
+	'prop_skip_06a',
+	'prop_skip_05a',
+	'prop_skip_03',
+	'prop_skip_10a'
 }
 
 Config.VehicleSpawn = {pos = vector3(-328.50,-1520.99, 27.53),}
@@ -38,11 +37,8 @@ Config.Zones = {
 	[3] = {type = 'Zone', size = 3.0 , name = 'vehiclelist', pos   = vector3(-316.16,-1536.08, 26.65),},
 }
 
-
-
 -- if you wish to add more pickup locations must have the same format as below.  Make sure when you are selecting locations you have
 -- your Settings\Graphics\Distance Scaling - turned all the way down to make sure the bin will show up for everyone.
-
 Config.Collections = {
 	[1] = {type = 'Collection', size = 5.0 , name = 'collection', pos   = vector3(114.83,-1462.31, 29.29508),},
 	[2] = {type = 'Collection', size = 5.0 , name = 'collection', pos   = vector3(-6.04,-1566.23, 29.209197),},
