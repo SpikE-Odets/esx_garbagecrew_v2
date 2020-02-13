@@ -4,6 +4,7 @@ game 'gta5'
 
 server_scripts {
 	'@es_extended/locale.lua',
+	'locales/cs.lua',
 	'locales/en.lua',
 	'config.lua',
 	'server/main.lua'
@@ -11,6 +12,7 @@ server_scripts {
 
 client_scripts {
 	'@es_extended/locale.lua',
+	'locales/cs.lua',
 	'locales/en.lua',
 	'config.lua',
 	'client/main.lua'
