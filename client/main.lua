@@ -4,8 +4,6 @@ local HasAlreadyEnteredArea, clockedin, vehiclespawned, albetogetbags, truckdepo
 local work_truck, NewDrop, LastDrop, binpos, truckpos, garbagebag, truckplate = nil, nil, nil, nil, nil, nil, nil
 local Blips, CollectionJobs, depositlist = {}, {}, {}
 
-
-
 Citizen.CreateThread(function()
 	while ESX == nil do
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
@@ -142,7 +140,6 @@ Citizen.CreateThread( function()
 	end
 end)
 
-
 Citizen.CreateThread( function()
 	while true do 
 		Citizen.Wait(0)
@@ -200,13 +197,10 @@ Citizen.CreateThread( function()
 					PlaceBagInTruck(currentZone)
 					IsInArea = false
 				end
-
 			end
 		end
-
 	end
 end)
-
 
 -- thread so the script knows you have entered a markers area - 
 Citizen.CreateThread( function()
@@ -242,7 +236,6 @@ Citizen.CreateThread( function()
 			if GetDistanceBetweenCoords(plyloc, v.pos, false)  <  2.0 and truckpos == nil then
 				IsInArea = true
 				currentZone = v
-
 			end
 		end
 
@@ -262,17 +255,19 @@ Citizen.CreateThread( function()
 	end
 end)
 
-
 function CollectBagFromBin(currentZone)
 	binpos = currentZone.pos
 	truckplate = currentZone.trucknumber
+
 	if not HasAnimDictLoaded("anim@heists@narcotics@trash") then
 		RequestAnimDict("anim@heists@narcotics@trash") 
 		while not HasAnimDictLoaded("anim@heists@narcotics@trash") do 
 			Citizen.Wait(0)
 		end
 	end
+
 	local worktruck = NetworkGetEntityFromNetworkId(currentZone.truckid)
+
 	if DoesEntityExist(worktruck) and GetDistanceBetweenCoords(GetEntityCoords(worktruck), GetEntityCoords(GetPlayerPed(-1)), true) < 25.0 then
 		truckpos = GetOffsetFromEntityInWorldCoords(worktruck, 0.0, -5.25, 0.0)
 		TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_BUM_BIN", 0, true)
@@ -281,6 +276,7 @@ function CollectBagFromBin(currentZone)
 		Citizen.Wait(4000)
 		ClearPedTasks(PlayerPedId())
 		local randombag = math.random(0,2)
+
 		if randombag == 0 then
 			garbagebag = CreateObject(GetHashKey("prop_cs_street_binbag_01"), 0, 0, 0, true, true, true) -- creates object
 			AttachEntityToEntity(garbagebag, GetPlayerPed(-1), GetPedBoneIndex(GetPlayerPed(-1), 57005), 0.4, 0, 0, 0, 270.0, 60.0, true, true, false, true, 1, true) -- object is attached to right hand    
@@ -290,12 +286,12 @@ function CollectBagFromBin(currentZone)
 		elseif randombag == 2 then
 			garbagebag = CreateObject(GetHashKey("hei_prop_heist_binbag"), 0, 0, 0, true, true, true) -- creates object
 			AttachEntityToEntity(garbagebag, GetPlayerPed(-1), GetPedBoneIndex(GetPlayerPed(-1), 57005), 0.12, 0.0, 0.00, 25.0, 270.0, 180.0, true, true, false, true, 1, true) -- object is attached to right hand    
-		end   
+		end  
+
 		TaskPlayAnim(PlayerPedId(), 'anim@heists@narcotics@trash', 'walk', 1.0, -1.0,-1,49,0,0, 0,0)
 		CurrentAction = nil
 		CurrentActionMsg = nil
 		HasAlreadyEnteredArea = false
-
 	else
 		ESX.ShowNotification(_U('not_near_truck'))
 		TriggerServerEvent('esx_garbagecrew:unknownlocation', currentZone.pos, currentZone.trucknumber)
@@ -402,16 +398,12 @@ end
 function MenuCloakRoom()
 	ESX.UI.Menu.CloseAll()
 
-	ESX.UI.Menu.Open(
-		'default', GetCurrentResourceName(), 'cloakroom',
-		{
+	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'cloakroom', {
 			title    = _U('cloakroom'),
 			elements = {
 				{label = _U('job_wear'), value = 'job_wear'},
 				{label = _U('citizen_wear'), value = 'citizen_wear'}
-			}
-		},
-		function(data, menu)
+			}}, function(data, menu)
 			if data.current.value == 'citizen_wear' then
 				clockedin = false
 				if Config.UseWorkClothing then
@@ -455,17 +447,13 @@ function MenuCloakRoom()
 						SetPlayerModel(PlayerId(), model)
 						SetModelAsNoLongerNeeded(model)
 						end
-						
 					end)
 				end
-	
 			end	
 			menu.close()
-		end,
-		function(data, menu)
+		end, function(data, menu)
 			menu.close()
-		end
-	)
+		end)
 end
 
 function MenuVehicleSpawner()
@@ -475,16 +463,12 @@ function MenuVehicleSpawner()
 		table.insert(elements, {label = GetLabelText(GetDisplayNameFromVehicleModel(Config.Trucks[i])), value = Config.Trucks[i]})
 	end
 
-
 	ESX.UI.Menu.CloseAll()
 
-	ESX.UI.Menu.Open(
-		'default', GetCurrentResourceName(), 'vehiclespawner',
-		{
+	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'vehiclespawner', {
 			title    = _U('vehiclespawner'),
 			elements = elements
-		},
-		function(data, menu)
+		}, function(data, menu)
 			ESX.Game.SpawnVehicle(data.current.value, Config.VehicleSpawn.pos, 270.0, function(vehicle)
 				local trucknumber = Config.TruckPlateNumb + 1
 				if trucknumber <=9 then
@@ -498,24 +482,19 @@ function MenuVehicleSpawner()
 					worktruckplate =   'GCREW'..trucknumber 
 				end
 
-
 				TriggerServerEvent('esx_garbagecrew:movetruckcount')   
 				SetEntityAsMissionEntity(vehicle,true, true)
 				TaskWarpPedIntoVehicle(GetPlayerPed(-1), vehicle, -1)  
 				vehiclespawned = true 
 				work_truck = vehicle
 				FindDeliveryLoc()
-
 			end)
 
 			menu.close()
-		end,
-		function(data, menu)
+		end, function(data, menu)
 			menu.close()
-		end
-	)
+		end)
 end
-
 
 Citizen.CreateThread(function()
 	local blip = AddBlipForCoord(Config.Zones[2].pos)
