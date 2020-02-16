@@ -151,7 +151,7 @@ AddEventHandler('esx_garbagecrew:paycrew', function(number)
     currentcrew = currentjobs[number].workers
     payamount = (Config.StopPay / currentjobs[number].totalbags) + Config.BagPay
     for i, v in pairs(currentcrew) do
-        local xPlayer = esx.GetPlayerFromId(v.id)
+        local xPlayer = ESX.GetPlayerFromId(v.id)
         if xPlayer ~= nil then
             local amount = math.ceil(payamount * v.bags)
             xPlayer.addMoney(tonumber(amount))
