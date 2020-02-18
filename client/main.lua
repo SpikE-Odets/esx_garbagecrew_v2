@@ -1,5 +1,5 @@
 ESX = nil
-local AreaType, AreaMarker, AreaInfo, currentZone, currentstop = nil, nil, nil, nil, 0
+local esxloaded, AreaType, AreaMarker, AreaInfo, currentZone, currentstop = false, nil, nil, nil, nil, 0
 local HasAlreadyEnteredArea, clockedin, vehiclespawned, albetogetbags, truckdeposit = false, false, false, false, false
 local work_truck, NewDrop, LastDrop, binpos, truckpos, garbagebag, truckplate, mainblip = nil, nil, nil, nil, nil, nil, nil, nil
 local Blips, CollectionJobs, depositlist = {}, {}, {}
@@ -15,6 +15,21 @@ Citizen.CreateThread(function()
 	end
 
 	PlayerData = ESX.GetPlayerData()
+	
+	if PlayerData.job.name == 'garbage' then
+		mainblip = AddBlipForCoord(Config.Zones[2].pos)
+
+		SetBlipSprite (mainblip, 318)
+		SetBlipDisplay(mainblip, 4)
+		SetBlipScale  (mainblip, 1.2)
+		SetBlipColour (mainblip, 5)
+		SetBlipAsShortRange(mainblip, true)
+
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString(_U('blip_job'))
+		EndTextCommandSetBlipName(mainblip)
+	end
+	esxloaded = true
 end)
 
 RegisterNetEvent('esx:playerLoaded')
@@ -103,7 +118,7 @@ Citizen.CreateThread( function()
 		plyloc = GetEntityCoords(ply)
 
 		for i, v in pairs(Config.Zones) do
-			if GetDistanceBetweenCoords(plyloc, v.pos, true)  < 20.0 then
+			if GetDistanceBetweenCoords(plyloc, v.pos, true)  < 20.0 and esxloaded then
 				sleep = 0
 				if v.name == 'timeclock' and IsGarbageJob() then
 					DrawMarker(1, v.pos.x, v.pos.y, v.pos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, v.size,  v.size, 1.0, 204,204, 0, 100, false, true, 2, false, false, false, false)
@@ -519,20 +534,5 @@ function MenuVehicleSpawner()
 end
 
 Citizen.CreateThread(function()
-	while ESX.GetPlayerData().job == nil do
-		Citizen.Wait(0)
-	end
-	if ESX.GetPlayerData().job == 'garbage' then
-		mainblip = AddBlipForCoord(Config.Zones[2].pos)
 
-		SetBlipSprite (mainblip, 318)
-		SetBlipDisplay(mainblip, 4)
-		SetBlipScale  (mainblip, 1.2)
-		SetBlipColour (mainblip, 5)
-		SetBlipAsShortRange(mainblip, true)
-
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(_U('blip_job'))
-		EndTextCommandSetBlipName(mainblip)
-	end
 end)
