@@ -1,7 +1,7 @@
 ESX = nil
 local AreaType, AreaMarker, AreaInfo, currentZone, currentstop = nil, nil, nil, nil, 0
 local HasAlreadyEnteredArea, clockedin, vehiclespawned, albetogetbags, truckdeposit = false, false, false, false, false
-local work_truck, NewDrop, LastDrop, binpos, truckpos, garbagebag, truckplate = nil, nil, nil, nil, nil, nil, nil
+local work_truck, NewDrop, LastDrop, binpos, truckpos, garbagebag, truckplate, mainblip = nil, nil, nil, nil, nil, nil, nil, nil
 local Blips, CollectionJobs, depositlist = {}, {}, {}
 
 Citizen.CreateThread(function()
@@ -26,6 +26,7 @@ end)
 RegisterNetEvent('esx:setJob')
 AddEventHandler('esx:setJob', function(job)
 	PlayerData.job = job
+	TriggerEvent('esx_garbagecrew:checkjob')
 end)
 
 RegisterNetEvent('esx_garbagecrew:movetruckcount')
@@ -137,6 +138,27 @@ Citizen.CreateThread( function()
 		end
 
 		Citizen.Wait(sleep)
+	end
+end)
+
+AddEventHandler('esx_garbagecrew:checkjob', function()
+	if ESX.GetPlayerData().job.name ~= 'garbage' then
+		if mainblip ~= nil then
+			RemoveBlip(mainblip)
+			mainblip = nil
+		end
+	elseif mainblip == nil then
+		mainblip = AddBlipForCoord(Config.Zones[2].pos)
+
+		SetBlipSprite (mainblip, 318)
+		SetBlipDisplay(mainblip, 4)
+		SetBlipScale  (mainblip, 1.2)
+		SetBlipColour (mainblip, 5)
+		SetBlipAsShortRange(mainblip, true)
+
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString(_U('blip_job'))
+		EndTextCommandSetBlipName(mainblip)
 	end
 end)
 
@@ -497,15 +519,20 @@ function MenuVehicleSpawner()
 end
 
 Citizen.CreateThread(function()
-	local blip = AddBlipForCoord(Config.Zones[2].pos)
-  
-	SetBlipSprite (blip, 318)
-	SetBlipDisplay(blip, 4)
-	SetBlipScale  (blip, 1.2)
-	SetBlipColour (blip, 5)
-	SetBlipAsShortRange(blip, true)
+	while ESX.GetPlayerData().job == nil do
+		Citizen.Wait(0)
+	end
+	if ESX.GetPlayerData().job == 'garbage' then
+		mainblip = AddBlipForCoord(Config.Zones[2].pos)
 
-	BeginTextCommandSetBlipName("STRING")
-	AddTextComponentString(_U('blip_job'))
-	EndTextCommandSetBlipName(blip)
+		SetBlipSprite (mainblip, 318)
+		SetBlipDisplay(mainblip, 4)
+		SetBlipScale  (mainblip, 1.2)
+		SetBlipColour (mainblip, 5)
+		SetBlipAsShortRange(mainblip, true)
+
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString(_U('blip_job'))
+		EndTextCommandSetBlipName(mainblip)
+	end
 end)
