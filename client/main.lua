@@ -532,7 +532,3 @@ function MenuVehicleSpawner()
 			menu.close()
 		end)
 end
-
-Citizen.CreateThread(function()
-
-end)
