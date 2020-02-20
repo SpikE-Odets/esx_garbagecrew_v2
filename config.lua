@@ -7,7 +7,6 @@ Config.MinBags = 4 -- Min number of bags that a bin can contain.
 Config.BagPay = 25 -- The amount paid to each person per bag
 Config.StopPay = 200 -- Total pay for the stop before bagpay.
 
-Config.Debug = true
 
 --Config.UseWorkClothing = true	--  This feature has been removed until I can find the issue with removing player loadout on reload
 
