@@ -60,5 +60,5 @@ Config.Collections = {
 	[17] = {type = 'Collection', size = 5.0 , name = 'collection', pos   = vector3(-31.94,-93.43, 57.24907),},
 	[18] = {type = 'Collection', size = 5.0 , name = 'collection', pos   = vector3(274.31,-164.43, 60.35734),},
 	[19] = {type = 'Collection', size = 5.0 , name = 'collection', pos   = vector3(-364.33,-1864.71, 20.24249),}, 
-	[20] = {type = 'Collection', size = 5.0 , name = 'collection', pos   = vector3(-1239.42, -1401.13, 3.75217),}, 
+	[20] = {type = 'Collection', size = 5.0 , name = 'collection', pos   = vector3(-1239.42, -1401.13, 3.75217),},
 }

@@ -67,10 +67,7 @@ AddEventHandler('esx_garbagecrew:selectnextjob', function()
 		oncollection = false
 		SetVehicleDoorShut(work_truck, 5, false)
 		RemoveBlip(Blips['delivery'])
-		Blips['endmission'] = AddBlipForCoord(Config.Zones[1].pos)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(_U('blip_goal'))
-		EndTextCommandSetBlipName(Blips['endmission'])
+		SetBlipRoute(Blips['endmission'], true)
 		albetogetbags = false
 		ESX.ShowNotification(_U('return_depot'))
 	end
@@ -220,6 +217,7 @@ Citizen.CreateThread( function()
 						Blips['endmission'] = nil
 					end
 					SetBlipRoute(Blips['delivery'], false)
+					SetBlipRoute(Blips['endmission'], false)
 					vehiclespawned = false
 					CurrentAction =nil
 					CurrentActionMsg = nil
@@ -429,7 +427,6 @@ function FindDeliveryLoc()
 	Blips['endmission'] = AddBlipForCoord(Config.Zones[1].pos)
 	SetBlipSprite (Blips['endmission'], 318)
 	SetBlipColour(Blips['endmission'], 1)
-	SetBlipAsShortRange(Blips['endmission'], true)
 	BeginTextCommandSetBlipName("STRING")
 	AddTextComponentString(_U('blip_goal'))
 	EndTextCommandSetBlipName(Blips['endmission'])
