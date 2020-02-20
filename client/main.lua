@@ -57,10 +57,23 @@ end)
 
 RegisterNetEvent('esx_garbagecrew:selectnextjob')
 AddEventHandler('esx_garbagecrew:selectnextjob', function()
-	SetVehicleDoorShut(work_truck, 5, false)
-	SetBlipRoute(Blips['delivery'], false)
-	FindDeliveryLoc()
-	albetogetbags = false
+	if currentstop < Config.MaxStops then
+		SetVehicleDoorShut(work_truck, 5, false)
+		SetBlipRoute(Blips['delivery'], false)
+		FindDeliveryLoc()
+		albetogetbags = false
+	else
+		NewDrop = nil
+		oncollection = false
+		SetVehicleDoorShut(work_truck, 5, false)
+		RemoveBlip(Blips['delivery'])
+		Blips['endmission'] = AddBlipForCoord(Config.Zones[1].pos)
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString(_U('blip_goal'))
+		EndTextCommandSetBlipName(Blips['endmission'])
+		albetogetbags = false
+		ESX.ShowNotification(_U('return_depot'))
+	end
 end)
 
 RegisterNetEvent('esx_garbagecrew:enteredarea')
@@ -307,10 +320,14 @@ function CollectBagFromBin(currentZone)
 
 	if DoesEntityExist(worktruck) and GetDistanceBetweenCoords(GetEntityCoords(worktruck), GetEntityCoords(GetPlayerPed(-1)), true) < 25.0 then
 		truckpos = GetOffsetFromEntityInWorldCoords(worktruck, 0.0, -5.25, 0.0)
-		TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_BUM_BIN", 0, true)
+		if not Config.Debug then
+			TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_BUM_BIN", 0, true)
+		end
 		TriggerServerEvent('esx_garbagecrew:bagremoval', currentZone.pos, currentZone.trucknumber) 
 		trashcollection = false
-		Citizen.Wait(4000)
+		if not Config.Debug then
+			Citizen.Wait(4000)
+		end
 		ClearPedTasks(PlayerPedId())
 		local randombag = math.random(0,2)
 
@@ -375,51 +392,50 @@ function SelectBinAndCrew(location)
 		SetVehicleDoorOpen(work_truck, 5, false, false)
 	else
 		ESX.ShowNotification('No trash available for pickup at this location.')
-		SetBlipRoute(Blips['delivery'], false)
+		SetBlipRoute(Blips['endmission'], true)
 		FindDeliveryLoc()
 	end
 end
 
 function FindDeliveryLoc()
-	if currentstop < Config.MaxStops then
-		if LastDrop ~= nil then
-			lastregion = GetNameOfZone(LastDrop.pos)
-		end
-		local newdropregion = nil
-		while newdropregion == nil or newdropregion == lastregion do
-			randomloc = math.random(1, #Config.Collections)
-			newdropregion = GetNameOfZone(Config.Collections[randomloc].pos)
-		end
-		NewDrop = Config.Collections[randomloc]
-		LastDrop = NewDrop
-		if Blips['delivery'] ~= nil then
-			RemoveBlip(Blips['delivery'])
-			Blips['delivery'] = nil
-		end
-		
-		if Blips['endmission'] ~= nil then
-			RemoveBlip(Blips['endmission'])
-			Blips['endmission'] = nil
-		end
-		
-		Blips['delivery'] = AddBlipForCoord(NewDrop.pos)
-		SetBlipSprite (Blips['delivery'], 318)
-		SetBlipAsShortRange(Blips['delivery'], true)
-		SetBlipRoute(Blips['delivery'], true)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(_U('blip_delivery'))
-		EndTextCommandSetBlipName(Blips['delivery'])
-		
-		Blips['endmission'] = AddBlipForCoord(Config.Zones[1].pos)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(_U('blip_goal'))
-		EndTextCommandSetBlipName(Blips['endmission'])
-
-		oncollection = true
-		ESX.ShowNotification(_U('drive_to_collection'))
-	else
-		ESX.ShowNotification(_U('return_depot'))
+	if LastDrop ~= nil then
+		lastregion = GetNameOfZone(LastDrop.pos)
 	end
+	local newdropregion = nil
+	while newdropregion == nil or newdropregion == lastregion do
+		randomloc = math.random(1, #Config.Collections)
+		newdropregion = GetNameOfZone(Config.Collections[randomloc].pos)
+	end
+	NewDrop = Config.Collections[randomloc]
+	LastDrop = NewDrop
+	if Blips['delivery'] ~= nil then
+		RemoveBlip(Blips['delivery'])
+		Blips['delivery'] = nil
+	end
+	
+	if Blips['endmission'] ~= nil then
+		RemoveBlip(Blips['endmission'])
+		Blips['endmission'] = nil
+	end
+	
+	Blips['delivery'] = AddBlipForCoord(NewDrop.pos)
+	SetBlipSprite (Blips['delivery'], 318)
+	SetBlipAsShortRange(Blips['delivery'], true)
+	SetBlipRoute(Blips['delivery'], true)
+	BeginTextCommandSetBlipName("STRING")
+	AddTextComponentString(_U('blip_delivery'))
+	EndTextCommandSetBlipName(Blips['delivery'])
+	
+	Blips['endmission'] = AddBlipForCoord(Config.Zones[1].pos)
+	SetBlipSprite (Blips['endmission'], 318)
+	SetBlipColour(Blips['endmission'], 1)
+	SetBlipAsShortRange(Blips['endmission'], true)
+	BeginTextCommandSetBlipName("STRING")
+	AddTextComponentString(_U('blip_goal'))
+	EndTextCommandSetBlipName(Blips['endmission'])
+
+	oncollection = true
+	ESX.ShowNotification(_U('drive_to_collection'))
 end
 
 function IsGarbageJob()
@@ -443,6 +459,7 @@ function MenuCloakRoom()
 			}}, function(data, menu)
 			if data.current.value == 'citizen_wear' then
 				clockedin = false
+				--[[
 				if Config.UseWorkClothing then
 					ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
 						local model = nil
@@ -465,9 +482,11 @@ function MenuCloakRoom()
 						TriggerEvent('skinchanger:loadSkin', skin)
 				  	end)
 				end
+				]]
       		end
 			if data.current.value == 'job_wear' then
 				clockedin = true
+				--[[
 				if Config.UseWorkClothing then
 					ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
 						if skin.sex == 0 then
@@ -485,7 +504,7 @@ function MenuCloakRoom()
 						SetModelAsNoLongerNeeded(model)
 						end
 					end)
-				end
+				end]]
 			end	
 			menu.close()
 		end, function(data, menu)
