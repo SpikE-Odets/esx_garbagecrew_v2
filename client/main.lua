@@ -540,6 +540,7 @@ function MenuVehicleSpawner()
 				TaskWarpPedIntoVehicle(GetPlayerPed(-1), vehicle, -1)  
 				vehiclespawned = true 
 				work_truck = vehicle
+				currentstop = 0
 				FindDeliveryLoc()
 			end)
 
