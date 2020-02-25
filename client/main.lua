@@ -1,7 +1,7 @@
 ESX = nil
-local esxloaded, AreaType, AreaMarker, AreaInfo, currentZone, currentstop = false, nil, nil, nil, nil, 0
+local esxloaded, currentstop = false, 0
 local HasAlreadyEnteredArea, clockedin, vehiclespawned, albetogetbags, truckdeposit = false, false, false, false, false
-local work_truck, NewDrop, LastDrop, binpos, truckpos, garbagebag, truckplate, mainblip = nil, nil, nil, nil, nil, nil, nil, nil
+local work_truck, NewDrop, LastDrop, binpos, truckpos, garbagebag, truckplate, mainblip, AreaType, AreaInfo, currentZone, currentstop, AreaMarker
 local Blips, CollectionJobs, depositlist = {}, {}, {}
 
 Citizen.CreateThread(function()
