@@ -1,12 +1,8 @@
 ESX = nil
 
-
-local currentjobs = {}
-local currentadd = {}
-local currentworkers = {}
+local currentjobs, currentadd, currentworkers = {}, {}, {}
 
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-
 
 Citizen.CreateThread(function()
     while true do
@@ -58,7 +54,6 @@ Citizen.CreateThread(function()
     end
 end)
 
-
 RegisterServerEvent('esx_garbagecrew:bagdumped')
 AddEventHandler('esx_garbagecrew:bagdumped', function(location, truckplate)
     local _source = source
@@ -70,7 +65,6 @@ AddEventHandler('esx_garbagecrew:bagdumped', function(location, truckplate)
     }
     table.insert(currentadd, buildlist)
 end)
-
 
 RegisterServerEvent('esx_garbagecrew:setworkers')
 AddEventHandler('esx_garbagecrew:setworkers', function(location, trucknumber, truckid)
@@ -86,8 +80,6 @@ AddEventHandler('esx_garbagecrew:setworkers', function(location, trucknumber, tr
    table.insert(currentadd, buildlist)
    print(tostring(#currentadd))
 end)
-
-
 
 
 RegisterServerEvent('esx_garbagecrew:unknownlocation')
@@ -117,7 +109,6 @@ AddEventHandler('esx_garbagecrew:bagremoval', function(location, trucknumber)
     TriggerClientEvent('esx_garbagecrew:updatejobs', -1, currentjobs)
 end)
 
-
 RegisterServerEvent('esx_garbagecrew:movetruckcount')
 AddEventHandler('esx_garbagecrew:movetruckcount', function()
     Config.TruckPlateNumb = Config.TruckPlateNumb + 1
@@ -145,7 +136,6 @@ AddEventHandler('playerDropped', function()
         end
      end
 end)
-
 
 AddEventHandler('esx_garbagecrew:paycrew', function(number)
     currentcrew = currentjobs[number].workers
