@@ -219,6 +219,7 @@ Citizen.CreateThread( function()
 					SetBlipRoute(Blips['delivery'], false)
 					SetBlipRoute(Blips['endmission'], false)
 					vehiclespawned = false
+					albetogetbags = false
 					CurrentAction =nil
 					CurrentActionMsg = nil
 				end
@@ -539,6 +540,7 @@ function MenuVehicleSpawner()
 				SetEntityAsMissionEntity(vehicle,true, true)
 				TaskWarpPedIntoVehicle(GetPlayerPed(-1), vehicle, -1)  
 				vehiclespawned = true 
+				albetogetbags = false
 				work_truck = vehicle
 				currentstop = 0
 				FindDeliveryLoc()
