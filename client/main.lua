@@ -167,7 +167,7 @@ Citizen.CreateThread( function()
 end)
 
 AddEventHandler('esx_garbagecrew:checkjob', function()
-	if ESX.GetPlayerData().job.name ~= 'garbage' then
+	if PlayerData.job.name ~= 'garbage' then
 		if mainblip ~= nil then
 			RemoveBlip(mainblip)
 			mainblip = nil
