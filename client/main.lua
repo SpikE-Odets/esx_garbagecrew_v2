@@ -82,7 +82,7 @@ AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 	end
 
 	if CurrentAction == 'vehiclelist' then
-		if clockedin  then
+		if clockedin and not vehiclespawned then
 			MenuVehicleSpawner()
 		end
 	end
