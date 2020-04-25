@@ -390,7 +390,7 @@ function SelectBinAndCrew(location)
 		currentstop = currentstop + 1
 		SetVehicleDoorOpen(work_truck, 5, false, false)
 	else
-		ESX.ShowNotification('No trash available for pickup at this location.')
+		ESX.ShowNotification( _U('no_trash_aviable'))
 		SetBlipRoute(Blips['endmission'], true)
 		FindDeliveryLoc()
 	end
