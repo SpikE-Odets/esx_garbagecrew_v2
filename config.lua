@@ -6,6 +6,8 @@ Config.MaxBags = 10 -- Total number of bags a person can get out of a bin
 Config.MinBags = 4 -- Min number of bags that a bin can contain.
 Config.BagPay = 25 -- The amount paid to each person per bag
 Config.StopPay = 200 -- Total pay for the stop before bagpay.
+Config.JobName = 'unemployed'  -- use this to set the jobname that you want to be able to do garbagecrew 
+
 --Config.UseWorkClothing = true	-- This feature has been removed until I can find the issue with removing player loadout on reload
 
 Config.Trucks = {
@@ -14,18 +16,18 @@ Config.Trucks = {
 }
 
 Config.DumpstersAvaialbe = {
-  'prop_dumpster_01a',
-  'prop_dumpster_02a',
-  'prop_dumpster_02b',
-  'prop_dumpster_3a',
-  'prop_dumpster_4a',
-  'prop_dumpster_4b',
-  'prop_skip_01a',
-  'prop_skip_02a',
-  'prop_skip_06a',
-  'prop_skip_05a',
-  'prop_skip_03',
-  'prop_skip_10a'
+  218085040,
+  666561306,
+  -58485588,
+  -206690185,
+  1511880420,
+  682791951,
+  -387405094,
+  364445978,
+  1605769687,
+  -1831107703,
+  -515278816,
+  -1790177567,
 }
 
 Config.VehicleSpawn = {pos = vector3(-328.50,-1520.99, 27.53),}
