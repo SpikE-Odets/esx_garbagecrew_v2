@@ -15,8 +15,8 @@ Citizen.CreateThread(function()
 	end
 
 	PlayerData = ESX.GetPlayerData()
-	
-	if PlayerData.job.name == 'garbage' then
+		
+	if PlayerData.job.name == Config.JobName then
 		mainblip = AddBlipForCoord(Config.Zones[2].pos)
 
 		SetBlipSprite (mainblip, 318)
@@ -29,6 +29,7 @@ Citizen.CreateThread(function()
 		AddTextComponentString(_U('blip_job'))
 		EndTextCommandSetBlipName(mainblip)
 	end
+		
 	esxloaded = true
 end)
 
@@ -82,7 +83,7 @@ AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 	end
 
 	if CurrentAction == 'vehiclelist' then
-		if clockedin and not vehiclespawned then 
+		if clockedin and not vehiclespawned then
 			MenuVehicleSpawner()
 		end
 	end
@@ -97,7 +98,6 @@ AddEventHandler('esx_garbagecrew:enteredarea', function(zone)
 		else
 			CurrentActionMsg = _U('need_work_truck')
 		end
-
 	end
 
 	if CurrentAction == 'bagcollection' then
@@ -167,7 +167,7 @@ Citizen.CreateThread( function()
 end)
 
 AddEventHandler('esx_garbagecrew:checkjob', function()
-	if PlayerData.job.name ~= 'garbage' then
+	if PlayerData.job.name ~= Config.JobName then
 		if mainblip ~= nil then
 			RemoveBlip(mainblip)
 			mainblip = nil
@@ -347,7 +347,7 @@ function CollectBagFromBin(currentZone)
 		HasAlreadyEnteredArea = false
 	else
 		ESX.ShowNotification(_U('not_near_truck'))
-		TriggerServerEvent('esx_garbagecrew:unknownlocation', currentZone.pos, currentZone.trucknumber)
+		TriggerServerEvent('esx_garbagecrew:unknownlocation', currentZone.pos)
 	end
 end
 
@@ -374,10 +374,15 @@ end
 
 function SelectBinAndCrew(location)
 	local bin = nil
+	
 	for i, v in pairs(Config.DumpstersAvaialbe) do
-		bin = GetClosestObjectOfType(location, 10.0, GetHashKey(v), false, false, false )
+		bin = GetClosestObjectOfType(location, 20.0, v, false, false, false )
 		if bin ~= 0 then
-			break
+			if CollectionJobs[GetEntityCoords(bin)] == nil then
+				break
+			else
+				bin = 0
+			end
 		end
 	end
 	if bin ~= 0 then
@@ -439,7 +444,7 @@ end
 function IsGarbageJob()
 	if ESX ~= nil then
 		local isjob = false
-		if PlayerData.job.name == 'garbage' then
+		if PlayerData.job.name == Config.JobName then
 			isjob = true
 		end
 		return isjob
@@ -501,13 +506,13 @@ function MenuVehicleSpawner()
 					SetVehicleNumberPlateText(vehicle, 'GCREW'..trucknumber)
 					worktruckplate =   'GCREW'..trucknumber 
 				end
-
 				TriggerServerEvent('esx_garbagecrew:movetruckcount')   
 				SetEntityAsMissionEntity(vehicle,true, true)
 				TaskWarpPedIntoVehicle(GetPlayerPed(-1), vehicle, -1)  
 				vehiclespawned = true 
 				albetogetbags = false
 				work_truck = vehicle
+
 				currentstop = 0
 				FindDeliveryLoc()
 			end)
