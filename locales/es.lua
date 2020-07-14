@@ -1,0 +1,19 @@
+Locales['es'] = {
+    ['cloakroom'] = 'Vestuario',
+    ['job_wear'] = 'Fichar entrada',
+    ['citizen_wear'] = 'Fichar salida',
+    ['vehiclespawner'] = 'Fichar camión', 
+    ['already_have_truck'] = 'Ya tienes camión!', 
+    ['collection'] = 'Pulsa ~INPUT_PICKUP~ para recoger.',
+    ['return_depot'] = 'Vuelve al depósito.',
+    ['blip_job'] = 'Centro de reciclaje', --'Garbage company',
+    ['blip_delivery'] = 'CDR : recogida', --'Garbage company : Delivery',
+    ['blip_goal'] = 'CDR : entrega', --'Garbage company : Delivery point',
+    ['cancel_mission'] = 'Pulsa ~INPUT_PICKUP~ para terminar/cancelar',
+    ['collect_bags'] = 'Pulsa ~INPUT_PICKUP~ para coger bolsas ( quedan %s )',
+    ['not_near_truck'] = 'No hay camión cerca.',
+    ['need_work_truck'] = 'debe estar en el camión de la empresa para empezar.',
+    ['toss_bag'] = 'Pulsa ~INPUT_PICKUP~ para meterla en el camión.',
+    ['drive_to_collection'] = 'Ve al punto asignado.',
+    ['no_trash_aviable'] = 'No hay basura disponible para recoger en esta ubicación.'
+  }

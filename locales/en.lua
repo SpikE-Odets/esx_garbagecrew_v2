@@ -15,4 +15,5 @@ Locales['en'] = {
   ['need_work_truck'] = 'you must be in company truck to start collection.',
   ['toss_bag'] = '~INPUT_PICKUP~ to place bag in truck.',
   ['drive_to_collection'] = 'drive to pickup location.',
+  ['no_trash_aviable'] = 'No trash available for pickup at this location.'
 }

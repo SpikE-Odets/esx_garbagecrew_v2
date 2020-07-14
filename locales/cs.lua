@@ -15,4 +15,5 @@ Locales['cs'] = {
   ['need_work_truck'] = 'Musis byt pobliz vozidla firmy pro sbirani.',
   ['toss_bag'] = '~INPUT_PICKUP~ pro hozeni pytle do vozidla.',
   ['drive_to_collection'] = 'dojed na oblast vyzvednuti.',
+  ['no_trash_aviable'] = 'Na tomto místě není k dispozici žádný koš pro vyzvednutí.' --  Google translate
 }

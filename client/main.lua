@@ -390,7 +390,7 @@ function SelectBinAndCrew(location)
 		currentstop = currentstop + 1
 		SetVehicleDoorOpen(work_truck, 5, false, false)
 	else
-		ESX.ShowNotification('No trash available for pickup at this location.')
+		ESX.ShowNotification( _U('no_trash_aviable'))
 		SetBlipRoute(Blips['endmission'], true)
 		FindDeliveryLoc()
 	end
@@ -457,53 +457,19 @@ function MenuCloakRoom()
 			}}, function(data, menu)
 			if data.current.value == 'citizen_wear' then
 				clockedin = false
-				--[[
-				if Config.UseWorkClothing then
-					ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
-						local model = nil
-  
-						if skin.sex == 0 then
-						  model = GetHashKey("mp_m_freemode_01")
-						else
-						  model = GetHashKey("mp_f_freemode_01")
-						end
-  
-						RequestModel(model)
-						while not HasModelLoaded(model) do
-						  RequestModel(model)
-						  Citizen.Wait(1)
-						end
-  
-						SetPlayerModel(PlayerId(), model)
-						SetModelAsNoLongerNeeded(model)
-  
-						TriggerEvent('skinchanger:loadSkin', skin)
-				  	end)
-				end
-				]]
-      		end
-			if data.current.value == 'job_wear' then
+				ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin)
+					TriggerEvent('skinchanger:loadSkin', skin)
+				end)
+			elseif data.current.value == 'job_wear' then
 				clockedin = true
-				--[[
-				if Config.UseWorkClothing then
-					ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
-						if skin.sex == 0 then
-							TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_male)
-						else
-							TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_female)
-	
-						RequestModel(model)
-						while not HasModelLoaded(model) do
-						RequestModel(model)
-						Citizen.Wait(0)
-						end
-	
-						SetPlayerModel(PlayerId(), model)
-						SetModelAsNoLongerNeeded(model)
-						end
-					end)
-				end]]
-			end	
+				ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin, jobSkin)
+					if skin.sex == 0 then
+						TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_male)
+					else
+						TriggerEvent('skinchanger:loadClothes', skin, jobSkin.skin_female)
+					end
+				end)
+			end
 			menu.close()
 		end, function(data, menu)
 			menu.close()
