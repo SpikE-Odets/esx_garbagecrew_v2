@@ -6,7 +6,7 @@ Config.MaxBags = 10 -- Total number of bags a person can get out of a bin
 Config.MinBags = 4 -- Min number of bags that a bin can contain.
 Config.BagPay = 25 -- The amount paid to each person per bag
 Config.StopPay = 200 -- Total pay for the stop before bagpay.
-Config.JobName = 'unemployed'  -- use this to set the jobname that you want to be able to do garbagecrew 
+Config.JobName = 'garbage'  -- use this to set the jobname that you want to be able to do garbagecrew 
 
 --Config.UseWorkClothing = true	-- This feature has been removed until I can find the issue with removing player loadout on reload
 
