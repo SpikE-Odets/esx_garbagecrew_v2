@@ -1,0 +1,19 @@
+Locales['nl'] = {
+  ['cloakroom']	= 'Garderobe',
+  ['job_wear'] = 'Inklokken',
+  ['citizen_wear'] = 'Uitklokken',
+  ['vehiclespawner'] = 'selecteer Truck keuze', 
+  ['already_have_truck'] = 'we hebben je al een truck gegeven!', 
+  ['collection'] = '~INPUT_PICKUP~ om op te pakken.',
+  ['return_depot'] = 'terug naar het depot.',
+  ['blip_job'] = 'biffa Logistics', --'Garbage company',
+  ['blip_delivery'] = 'biffa Logistics : Pick-up Point', --'Garbage company : Delivery',
+  ['blip_goal'] = 'biffa Logistics : Terugkeer Punt', --'Garbage company : Delivery point',
+  ['cancel_mission'] = '~INPUT_PICKUP~ om te cancellen/ beeindigen',
+  ['collect_bags'] = '~INPUT_PICKUP~ om de zak op te pakken (%s ove)',
+  ['not_near_truck'] = 'geen truck dichtbij om de zakken in te gooien.',
+  ['need_work_truck'] = 'je moet in de werk truck zitten om te beginnen.',
+  ['toss_bag'] = '~INPUT_PICKUP~ om de zak in truck te gooien.',
+  ['drive_to_collection'] = 'rij naar pickup locatie.',
+  ['no_trash_aviable'] = 'Geen vuilnis beschikbaar op deze locatie.'
+}
